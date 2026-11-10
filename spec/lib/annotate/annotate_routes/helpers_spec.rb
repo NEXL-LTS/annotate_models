@@ -15,12 +15,16 @@ RSpec.describe AnnotateRoutes::Helpers do
     it 'handles a long whitespace-only line in the annotation block in linear time' do
       content = "# == Route Map\n#{' ' * 100_000}\nRails.application.routes.draw do\nend\n"
 
-      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      real_content, = described_class.strip_annotations(content)
-      elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+      (real_content,), elapsed = timed { described_class.strip_annotations(content) }
 
       expect(real_content).to eq(['Rails.application.routes.draw do', 'end', ''])
       expect(elapsed).to be < 1
+    end
+
+    def timed
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      result = yield
+      [result, Process.clock_gettime(Process::CLOCK_MONOTONIC) - started]
     end
   end
 end
