@@ -16,7 +16,7 @@ module AnnotateRoutes
         header_position = 0
 
         content.split(/\n/, -1).each_with_index do |line, line_number|
-          if mode == :header && line !~ /\s*#/
+          if mode == :header && !line.include?('#')
             mode = :content
             real_content << line unless line.blank?
           elsif mode == :content
